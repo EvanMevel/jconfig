@@ -40,6 +40,8 @@ class LocalFileSourceTest {
         private Map<String, NestedList> nestedMap = Map.of("key1", new NestedList(), "key2", new NestedList());
         @Save
         private UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        @Save
+        private File file = new File("testFile");
 
         @SuppressWarnings({"unused", "FieldMayBeFinal"})
         private String notSaved = "notSaved";
@@ -108,6 +110,8 @@ class LocalFileSourceTest {
 
         TEST_JSON.put("uuid", "00000000-0000-1111-0000-000000000000");
 
+        TEST_JSON.put("file", new File("aa").getAbsolutePath());
+
 
         TEST_DATA.testStr = "test";
         TEST_DATA.testInt = 4444;
@@ -119,6 +123,7 @@ class LocalFileSourceTest {
         TEST_DATA.intArrayArray = new int[][]{{999, 888}};
         TEST_DATA.nestedMap = Map.of("key5", new NestedList(List.of(1111, 2222)));
         TEST_DATA.uuid = UUID.fromString("00000000-0000-1111-0000-000000000000");
+        TEST_DATA.file = new File("aa");
     }
 
     @BeforeEach
@@ -155,6 +160,8 @@ class LocalFileSourceTest {
         Assertions.assertEquals(2, test.nestedMap.get("key5").nestedDataList.size());
         Assertions.assertEquals(1111, test.nestedMap.get("key5").nestedDataList.get(0));
         Assertions.assertEquals(2222, test.nestedMap.get("key5").nestedDataList.get(1));
+        Assertions.assertEquals(UUID.fromString("00000000-0000-1111-0000-000000000000"), test.uuid);
+        Assertions.assertEquals(new File("aa").getAbsolutePath(), test.file.getAbsolutePath());
     }
 
     @Test

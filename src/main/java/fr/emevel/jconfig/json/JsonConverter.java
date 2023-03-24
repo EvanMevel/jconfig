@@ -9,14 +9,15 @@ import java.util.List;
 
 public class JsonConverter {
 
-    private static final List<JsonTypeConverter> SAVERS = List.of(
+    public static final List<JsonTypeConverter> SAVERS = List.of(
             new JsonPrimitiveConverter(),
             new JsonUUIDConverter(),
+            new JsonFileConverter(),
             new JsonArrayConverter(),
             new JsonCollectionConverter(),
-            new JsonMapConverter(),
-            new JsonObjectConverter()
+            new JsonMapConverter()
     );
+    private static final JsonObjectConverter OBJECT_CONVERTER = new JsonObjectConverter();
 
     public static Object fieldToObject(Object jsonValue, SaveFieldInfo info) throws IllegalAccessException {
         for (JsonTypeConverter saver : SAVERS) {
@@ -25,7 +26,7 @@ public class JsonConverter {
                 return value;
             }
         }
-        throw new IllegalStateException("Cannot load field " + info.getName() + " of type " + info.getType().getName());
+        return OBJECT_CONVERTER.fromJson(jsonValue, info);
     }
 
     public static <T> boolean jsonToObject(T data, JSONObject json) throws IllegalAccessException {
@@ -56,7 +57,7 @@ public class JsonConverter {
                 return jsonValue;
             }
         }
-        throw new IllegalStateException("Cannot save field of type " + object.getClass().getName());
+        return OBJECT_CONVERTER.toJson(object);
     }
 
     public static <T> void saveToJSON(T data, Class<?> clazz, JSONObject json) throws IllegalAccessException {
