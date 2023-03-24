@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 class LocalFileSourceTest {
 
@@ -37,6 +38,8 @@ class LocalFileSourceTest {
         private int[][] intArrayArray = new int[][]{{1, 2, 3}, {4, 5, 6}};
         @Save(type = NestedList.class)
         private Map<String, NestedList> nestedMap = Map.of("key1", new NestedList(), "key2", new NestedList());
+        @Save
+        private UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
         @SuppressWarnings({"unused", "FieldMayBeFinal"})
         private String notSaved = "notSaved";
@@ -103,6 +106,8 @@ class LocalFileSourceTest {
         nestedMap.put("key5", nestedMapList);
         TEST_JSON.put("nestedMap", nestedMap);
 
+        TEST_JSON.put("uuid", "00000000-0000-1111-0000-000000000000");
+
 
         TEST_DATA.testStr = "test";
         TEST_DATA.testInt = 4444;
@@ -113,6 +118,7 @@ class LocalFileSourceTest {
         TEST_DATA.intList = List.of(444, 555);
         TEST_DATA.intArrayArray = new int[][]{{999, 888}};
         TEST_DATA.nestedMap = Map.of("key5", new NestedList(List.of(1111, 2222)));
+        TEST_DATA.uuid = UUID.fromString("00000000-0000-1111-0000-000000000000");
     }
 
     @BeforeEach

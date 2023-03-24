@@ -11,6 +11,7 @@ public class JsonConverter {
 
     private static final List<JsonTypeConverter> SAVERS = List.of(
             new JsonPrimitiveConverter(),
+            new JsonUUIDConverter(),
             new JsonArrayConverter(),
             new JsonCollectionConverter(),
             new JsonMapConverter(),
