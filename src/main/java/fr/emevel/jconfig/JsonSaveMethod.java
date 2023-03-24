@@ -99,18 +99,23 @@ public class JsonSaveMethod implements SaveMethod {
                 field.set(data, value);
             } else {
                 Supplier<?> collectionSupplier = getCollectionSupplier(field.getType());
+                Object value;
                 if (collectionSupplier != null) {
                     Save sa = field.getAnnotation(Save.class);
                     if (sa.type() == Object.class) {
                         throw new IOException("Cannot load collection " + field.getName() + " without specifying type in @Save annotation");
                     }
-                    JSONArray array = json.getJSONArray(field.getName());
-                    Object value = loadCollectionField(sa.type(), collectionSupplier.get(), array);
-                    field.set(data, value);
+                    value = loadCollectionField(sa.type(), collectionSupplier.get(), json.getJSONArray(field.getName()));
+                } else if (Map.class.isAssignableFrom(field.getType())) {
+                    Save sa = field.getAnnotation(Save.class);
+                    if (sa.type() == Object.class) {
+                        throw new IOException("Cannot load Map " + field.getName() + " without specifying the value type in @Save annotation");
+                    }
+                    value = loadMapField(sa.type(), new HashMap<>(), json.getJSONObject(field.getName()));
                 } else {
-                    Object value = loadObjectField(field.getType(), json.getJSONObject(field.getName()));
-                    field.set(data, value);
+                    value = loadObjectField(field.getType(), json.getJSONObject(field.getName()));
                 }
+                field.set(data, value);
             }
         }
         return complete;
@@ -135,6 +140,14 @@ public class JsonSaveMethod implements SaveMethod {
         for (int i = 0; i < json.length(); i++) {
             Array.set(array, i, loadElement(elementType, json.get(i)));
         }
+    }
+
+    private <T> Map<String, T> loadMapField(Class<T> valueType, Object m, JSONObject json) throws IOException, IllegalAccessException {
+        Map<String, T> map = (Map<String, T>) m;
+        for (String key : json.keySet()) {
+            map.put(key, loadElement(valueType, json.get(key)));
+        }
+        return map;
     }
 
     private <T> T loadElement(Class<T> type, Object obj) throws IOException, IllegalAccessException {
@@ -188,6 +201,10 @@ public class JsonSaveMethod implements SaveMethod {
                 JSONArray array = new JSONArray();
                 saveArrayField(obj, array);
                 return array;
+            } else if (Map.class.isAssignableFrom(obj.getClass())) {
+                JSONObject mapJson = new JSONObject();
+                saveMapField(obj, mapJson);
+                return mapJson;
             } else {
                 JSONObject elementJson = new JSONObject();
                 saveObjectField(obj, elementJson);
@@ -200,12 +217,18 @@ public class JsonSaveMethod implements SaveMethod {
         saveJSON(data, data.getClass(), json);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> void saveCollectionField(Object coll, JSONArray json) throws IOException, IllegalAccessException {
         Collection<T> collection = (Collection<T>) coll;
         for (T element : collection) {
             Object value = getFieldValue(element);
             json.put(value);
+        }
+    }
+
+    private <T> void saveMapField(Object m, JSONObject json) throws IOException, IllegalAccessException {
+        Map<?, T> map = (Map<?, T>) m;
+        for (Map.Entry<?, T> entry : map.entrySet()) {
+            json.put(entry.getKey().toString(), getFieldValue(entry.getValue()));
         }
     }
 
