@@ -1,5 +1,7 @@
 package fr.emevel.jconfig;
 
+import fr.emevel.jconfig.json.JsonSaveMethod;
+
 import java.io.File;
 import java.io.IOException;
 
